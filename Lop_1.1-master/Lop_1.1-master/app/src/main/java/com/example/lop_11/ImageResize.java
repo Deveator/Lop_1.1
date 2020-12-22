@@ -1,5 +1,6 @@
 package com.example.lop_11;
 
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -13,11 +14,16 @@ public class ImageResize {
         Mat originImg = Imgcodecs.imread(path);// image is BGR format , try to get format
     //    Size sz = new Size(150, 200);
 
-        System.out.println(originImg.size());
+       // System.out.println(originImg.size());
+       // System.out.println(originImg.type());
+       // originImg.convertTo(originImg, CvType.CV_32FC2);
+        //int nChannels = originImg.channels();
+      //  System.out.println(originImg.type());
+    //    System.out.println(originImg.channels());
 
     //    Imgproc.resize(originImg, orImage, sz);
          orImage = originImg;
-        Imgproc.cvtColor(orImage, orImage, Imgproc.COLOR_BGR2RGB);
+       // Imgproc.cvtColor(orImage, orImage, Imgproc.COLOR_BGR2RGB);
         return orImage;
     }
 
