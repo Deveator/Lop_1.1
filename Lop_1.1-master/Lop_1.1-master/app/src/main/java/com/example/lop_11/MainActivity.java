@@ -13,6 +13,7 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.lop_11.CustomView.DrawRect;
@@ -34,13 +35,16 @@ import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static com.example.lop_11.CotourImage.getColorLines;
-import static com.example.lop_11.CotourImage.getMatFromROI;
-import static com.example.lop_11.CotourImage.rgb_string_array;
+import static com.example.lop_11.ContourImage.getColorLines;
+import static com.example.lop_11.ContourImage.rgb_string_array;
 import static com.example.lop_11.CustomView.DrawRect.xOrg;
 import static com.example.lop_11.CustomView.DrawRect.xRed;
 import static com.example.lop_11.CustomView.DrawRect.yGreen;
 import static com.example.lop_11.CustomView.DrawRect.yRed;
+import static com.example.lop_11.KmeansStuff.colorInWhite;
+import static com.example.lop_11.KmeansStuff.createColorArrays;
+import static com.example.lop_11.KmeansStuff.returnToOriginal;
+import static com.example.lop_11.KmeansStuff.showClusters;
 import static com.example.lop_11.Lab.diagonal_1;
 import static com.example.lop_11.Lab.diagonal_2;
 import static com.example.lop_11.Lab.diagonal_3;
@@ -48,7 +52,6 @@ import static com.example.lop_11.Lab.diagonal_4;
 import static com.example.lop_11.Lab.downUp;
 import static com.example.lop_11.Lab.findChangeDirectionPoints;
 import static com.example.lop_11.Lab.findPoligon;
-import static com.example.lop_11.Lab.findStarter;
 import static com.example.lop_11.Lab.leftRight;
 import static com.example.lop_11.Lab.rightLeft;
 import static com.example.lop_11.Lab.showBorderPointsArrays;
@@ -72,33 +75,30 @@ import static com.example.lop_11.LabImage.diffrent_Lab_indexes;
 import static com.example.lop_11.LabImage.diffrent_Lab_values;
 import static com.example.lop_11.LabImage.finalSortedCluster;
 import static com.example.lop_11.LabImage.yx_Values;
-import static org.opencv.core.Core.KMEANS_PP_CENTERS;
 import static org.opencv.core.Core.kmeans;
-import static org.opencv.core.TermCriteria.COUNT;
-import static org.opencv.core.TermCriteria.EPS;
-import static org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY;
-import static org.opencv.imgproc.Imgproc.COLOR_BGR2Lab;
-import static org.opencv.imgproc.Imgproc.COLOR_Lab2RGB;
 import static org.opencv.imgproc.Imgproc.cvtColor;
 
 public class MainActivity extends AppCompatActivity {
 
 
-    Button bttn7, bttn10, bttn11, bttn12, bttn13, bttn14, bttn24;
+    TextView alphaTv, betaTv;
+    Button bttn7, bttn10, bttn11, bttn12, bttn13, bttn14, bttn24, bttn31;
     public static String path;
     public static int screenWidth, idealWidth, idealHeight, originalHeight, originalWidth;
-    public static Mat oImageClusterColored, imgROIfromClustered, oImage, greyImg;
+    public static Mat oImageClusterColored, imgROIfromClustered, oImage, add_oImage, kMeansRoi;
     Bitmap bitmapS;
-    EditText eT;
+    EditText eT, eT1;
     public static int doubleTapCount = 3;// using in MyImageView class
     public static int clusterStep = 10;
+    public static double alpha = 1.0;
+    public static double beta = 0.0;
     View view3;
     MyImageView iV, iVadd;
     MyImageView iV2, iVadd2;
     static int m = 3;
     static int m2 = 3;
     int clickCount = 0;
-    static int numColorSections;
+    static int numColorSections, numClust = 2;
     public static int _xFromROI;
     public static int _yFromROI;
     public static ArrayList<Double> _1_clr = new ArrayList<Double>();
@@ -135,16 +135,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        System.out.println(113);
-
         System.loadLibrary("opencv_java3");
         OpenCVLoader.initDebug();
-
         bttn7 = findViewById(R.id.button7);
         bttn10 = findViewById(R.id.button10);
         eT = findViewById(R.id.editText);
+        eT.setText(String.valueOf(numClust));
         bttn12 = findViewById(R.id.button12);
-        bttn13 = findViewById(R.id.button13);
+        // bttn13 = findViewById(R.id.button13);
         bttn14 = findViewById(R.id.button14);
         bttn24 = findViewById(R.id.button24);
         iV = findViewById(R.id.imageV);
@@ -152,6 +150,12 @@ public class MainActivity extends AppCompatActivity {
         iV2 = findViewById(R.id.imageV2);
         iVadd2 = findViewById(R.id.imageVadd2);
         view3 = findViewById(R.id.imageV5);
+        eT1 = findViewById(R.id.eT1);
+        bttn31 = findViewById(R.id.button31);
+        alphaTv = findViewById(R.id.alphaTv);
+        alphaTv.setText(String.valueOf(alpha));
+        betaTv = findViewById(R.id.betaTv);
+        betaTv.setText(String.valueOf(beta));
 
     }
 
@@ -173,17 +177,28 @@ public class MainActivity extends AppCompatActivity {
             screenWidth = displayMetrics.widthPixels;
             // oImage is main image
             oImage = ImageResize.GetResizedImage(path);
+            add_oImage = ImageResize.GetResizedImage(path);
             oImageClusterColored = ImageResize.GetResizedImage(path);///
             idealWidth = oImage.cols();
             idealHeight = oImage.rows();
             view3.setVisibility(View.INVISIBLE);
+
+/*
+            Mat lookUpTable = new Mat(1, 256, CvType.CV_8U);
+            byte[] lookUpTableData = new byte[(int) (lookUpTable.total()*lookUpTable.channels())];
+            for (int i = 0; i < lookUpTable.cols(); i++) {
+                lookUpTableData[i] = saturate(Math.pow(i / 255.0, 1.2) * 255.0);
+            }
+            lookUpTable.put(0, 0, lookUpTableData);
+            Mat img = new Mat();
+            Core.LUT(oImage, lookUpTable, img);
+
+*/
+           // oImage.convertTo(oImage, -1, 3.0, 100);// make image more contrast
             //cvtColor(oImage, oImage, COLOR_BGR2GRAY);// added for idea
             if (g == 0) {
-                //  displayImage(oImage, iV2);
-               // System.out.println(oImage.type());
-               // getKMeanImage(oImage);
-                //System.out.println("DONE");
-                displayImage(getKMeanImage(oImage), iV2);
+                displayImage(oImage, iV);
+                //displayImage(getKMeanImage(oImage), iV2);
                 g++;
             } else {
                 displayImage(oImage, iVadd2);
@@ -191,12 +206,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public Mat getKMeanImage(Mat img) {
+    private byte saturate(double val) {
+        int iVal = (int) Math.round(val);
+        iVal = iVal > 255 ? 255 : (iVal < 0 ? 0 : iVal);
+        return (byte) iVal;
+    }
 
+ /*   public Mat getKMeanImage(Mat img) {
 
         img.convertTo(img, CvType.CV_32F);
         Mat data = img.reshape(1, (int) img.total());
-
         int K = 4;
         Mat bestLabels = new Mat();
         TermCriteria criteria = new TermCriteria();
@@ -214,31 +233,12 @@ public class MainActivity extends AppCompatActivity {
             double d[] = col.get(0, 0); // can't create Scalar directly from get(), 3 vs 4 elements
             draw.setTo(new Scalar(d[0], d[1], d[2]), mask);
         }
-
         draw = draw.reshape(3, img.rows());
         draw.convertTo(draw, CvType.CV_8U);
         System.out.println(draw.type());
-        // cvtColor(img, img, COLOR_BGR2Lab);
-        //  Mat data = img.reshape(-1, 3);
-
-        //int num_classes = 4;
-        //  TermCriteria criteria = new TermCriteria(EPS + COUNT, 50, 0.1);
-        //Mat helpMat = new Mat();
-        //System.out.println(999);
-        //System.out.println(helpMat.type());
-        //System.out.println(777);
-        //   Double _, labels, centers = kmeans(img, num_classes, helpMat, criteria, 10, KMEANS_PP_CENTERS);
-        //System.out.println(helpMat.type());
-        ///helpMat.convertTo(helpMat, CvType.CV_8UC3);
-       // System.out.println(helpMat.type());
-
-        // Mat segmented_lab = centers[labels.flatten()].reshape(image.shape);
-        // Mat segmented = cvtColor(segmented_lab, COLOR_Lab2RGB)
-
-        //_, labels, centers = kmeans(data, num_classes, None, criteria, 10, KMEANS_PP_CENTERS);
-
         return draw;
     }
+    */
 
     private String getPath(Uri uri) {
         if (uri == null) {
@@ -343,6 +343,15 @@ public class MainActivity extends AppCompatActivity {
             displayImage(oImage, iV);
             m2++;
         }
+    }
+
+    // change num of clusters
+    public void submitKNum(View view) {
+        String s = eT.getText().toString();
+        numClust = Integer.parseInt(s);
+        eT.setText(String.valueOf(numClust));
+
+
     }
 
     // sort  created color array from big to little
@@ -522,12 +531,24 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-    public void minusTr2(View view) {
+    public double getValFromTv(TextView tv){
+        return Double.parseDouble((String) tv.getText());
     }
 
-    public void plusMin_A(View view) {
+
+    public void alphaPlus(View view) {
+        double d = getValFromTv(alphaTv);
+        d++;
+        alphaTv.setText(String.valueOf(d));
     }
+ 
+    public void alphaMinus(View view) {
+        double d = getValFromTv(alphaTv);
+        d--;
+        alphaTv.setText(String.valueOf(d));
+    }
+
+
 
     public void clearROI(View view) {
 
@@ -590,174 +611,50 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // create color clusters, based on pixel's Lab value
+    // get mat from ROI and get Kmeans matImage
     public void _1_stage(View view) {
-
-        int col_ = oImage.cols();
-        int row_ = oImage.rows();
-
-        for (int i = 150; i < row_; i++) {
-            for (int j = 0; j < col_; j++) {
-                double[] v = oImage.get(i, j);
-                System.out.print(v[0] + ":");
-            }
-            System.out.println("N ");
-        }
-
-        //    double[] v = oImage.get(25, 25);
-
-        // for (int i = 0; i < v.length; i++) {
-
-        //       System.out.println(v[0]);
-        // }
-
-        // cvtColor(oImage, greyImg, COLOR_BGR2GRAY);
-        // displayImage(greyImg, iV);
-
-
-        // after note is code related to _1_stage
-        /*
-        setClusterStep();
-        if (!start) {
-            clearData();
-        }
-        LabImage.getClustersFromLabROIImg(getMatFromROI(oImage));// getMatFromROI(oImage) - convert ROI to Mat
-        start = false;
-        System.out.println("1 STAGE COMPLETED");
-        */
-
+        Mat m1 = KmeansStuff.getMatFromROI_km(oImage);
+        kMeansRoi = KmeansStuff.getKMeanImage(m1);
     }
 
     // put clustered color of ROI in image for work
     public void _2_stage(View view) {
-
-        for (int m = 0; m < all_diffY_Values.size(); m++) {
-            ArrayList<Integer> XValues = all_diffX_Values.get(m);
-            ArrayList<Integer> YValues = all_diffY_Values.get(m);
-            double[] dVal = getListColor();
-            for (int i = 0; i < XValues.size(); i++) {
-                oImageClusterColored.put(YValues.get(i), XValues.get(i), dVal);
-            }
-        }
-        Toast.makeText(getBaseContext(), "oImageClusterColored is ready", Toast.LENGTH_LONG).show();
-        displayImage(oImage, iV);
+        KmeansStuff.changeRoiInKmeans(kMeansRoi, add_oImage);
+        //    displayImage(oImage, iV);
         System.out.println("2 STAGE COMPLETED");
     }
 
-    // 1. Get clustered ROI from oImageClusterColored -> imgROIfromClustered is created
-    // 2. Get number of colors from imgROIfromClustered -> rgb_string_array is created
-    // !!! NEED REFACTORING
     public void _3_stage(View view) {
-        // clearDataForNext();
-        imgROIfromClustered = getColorLines(oImageClusterColored);
+        createColorArrays(kMeansRoi, numClust);
         System.out.println("3 STAGE COMPLETED");
     }
 
-    // create `colorDefiningAl` array based on `rgb_string_array`
+    // show clusters stepByStep
     public void _4_stage(View view) {
-
-        ArrayList<ArrayList> hAL = new ArrayList<ArrayList>();
-        ArrayList<Integer> hAL3 = new ArrayList<Integer>();
-
-        for (int i = 0; i < rgb_string_array.size(); i++) {
-            hAL3.add(0);
-            hAL3.add(0);
-            hAL3.add(0);
-            hAL3.add(0);
-            hAL3.add(i);
-            hAL.add((ArrayList) hAL3.clone());
-            hAL3.clear();
-            allColors_AL.add((ArrayList<ArrayList>) hAL.clone());
-            hAL.clear();
-        }
-        // create array for helping to find color
-        ArrayList<String> hAL4 = new ArrayList<String>();
-        for (int i = 0; i < rgb_string_array.size(); i++) {
-            hAL4.add(String.valueOf(i));
-            hAL4.add(rgb_string_array.get(i));
-            colorDefiningAl.add((ArrayList) hAL4.clone());
-            hAL4.clear();
-        }
-
-        for (int i = 0; i < colorDefiningAl.size(); i++) {
-            System.out.println(colorDefiningAl.get(i).get(0));
-            System.out.println(colorDefiningAl.get(i).get(1));
-        }
+        showClusters(oImage);
+        displayImage(oImage, iV);
         System.out.println("4 STAGE COMPLETED");
     }
 
-    // fill `all_colorsAL`
-    // !!! NEED REFACTORING for better performance
+    // return ROI to original color
     public void _5_stage(View view) {
-
-        upDown(imgROIfromClustered);
-        System.out.println("all_colorsAL size " + allColors_AL.size());
-
-        for (int i = 0; i < allColors_AL.size(); i++) {
-            System.out.println("all_colorsAL get " + i + " " + allColors_AL.get(i).size());
-        }
-
-        downUp(imgROIfromClustered);
-        //    System.out.println("downUp ready");
-        leftRight(imgROIfromClustered);
-        //    System.out.println("leftRight ready");
-        rightLeft(imgROIfromClustered);
-        //   System.out.println("rightLeft ready");
-        diagonal_1(imgROIfromClustered);
-        //   System.out.println("diagonal_1 ready");
-        diagonal_2(imgROIfromClustered);
-        //   System.out.println("diagonal_2 ready");
-        diagonal_3(imgROIfromClustered);
-        //    System.out.println("diagonal_3 ready");
-        diagonal_4(imgROIfromClustered);
-        //     System.out.println("diagonal_4 ready");
-
-        showBorderPointsArrays();
-
-        Toast.makeText(getBaseContext(), "READY", Toast.LENGTH_LONG).show();
+        returnToOriginal(oImage);
+        displayImage(oImage, iV);
         System.out.println("5 STAGE COMPLETED");
-
     }
 
-    // create color square
-    public void _6_stage(View view) {
-
-        //sortColorSquare();
-
-        for (int i = 0; i < allColors_AL.size(); i++) {
-
-            ArrayList<ArrayList> aL_1 = allColors_AL.get(i);
-            ArrayList<Integer> aL_2 = new ArrayList<>();
-
-            for (int j = 1; j < aL_1.size(); j++) {
-
-                int clrSqr = (int) aL_1.get(j).get(2);
-
-                if (!aL_2.contains(clrSqr)) {
-                    aL_2.add(clrSqr);
-                }
-            }
-
-            all_colorSquare.add((ArrayList) aL_2.clone());
-            aL_2.clear();
-        }
-
-        System.out.println(all_colorSquare.size());
-
-        for (int i = 0; i < all_colorSquare.size(); i++) {
-            System.out.println(i + " color ");
-            for (int j = 0; j < all_colorSquare.get(i).size(); j++) {
-
-                System.out.println(all_colorSquare.get(i).get(j));
-
-            }
-        }
-        System.out.println("6 STAGE COMPLETED");
+    // recolor in white
+    public void saveShow(View view) {
+        colorInWhite(oImage);
+        displayImage(oImage, iV);
     }
 
-    // create color section coordinates
+    // clear stuff
     public void _7_stage(View view) {
-        createColorSectionCoordinates();
+        KmeansStuff.count = 0;
+        KmeansStuff._Y.clear();
+        KmeansStuff._X.clear();
+        KmeansStuff._f.clear();
         System.out.println("7 STAGE COMPLETED");
     }
 

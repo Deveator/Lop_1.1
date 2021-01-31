@@ -169,8 +169,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:onClick="_6_stage"
-                android:text="6_stage"
+                android:onClick="saveShow"
+                android:text="Save"
                 android:textAllCaps="false"
                 android:textSize="10sp" />
 
@@ -181,7 +181,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="_7_stage"
-                android:text="7_stage"
+                android:text="Clear"
                 android:textAllCaps="false"
                 android:textSize="10sp" />
 
@@ -203,23 +203,21 @@
             android:layout_weight="8"
             android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/button13"
+            <TextView
+                android:id="@+id/alphaTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:onClick="orgnl"
-                android:text="orgnl"
-                android:textAllCaps="false"
-                android:textSize="10sp" />
+                android:textAllCaps="true"
+               />
 
             <Button
                 android:id="@+id/button14"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:onClick="white"
-                android:text="white"
+                android:onClick="alphaPlus"
+                android:text="alpha +"
                 android:textAllCaps="false"
                 android:textSize="10sp" />
 
@@ -228,8 +226,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:onClick="clearROI"
-                android:text="Clear"
+                android:onClick="alphaMinus"
+                android:text="alpha -"
                 android:textAllCaps="false"
                 android:textSize="10sp" />
 
@@ -240,58 +238,11 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="minusMaxIntense"
-                android:text="-"
+                android:text="--"
                 android:textAllCaps="false"
                 android:textSize="10sp" />
 
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="4"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/button15"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="upDownChange"
-                android:text="upDown"
-                android:textAllCaps="false"
-                android:textSize="10sp" />
-
-            <Button
-                android:id="@+id/button16"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="downUpChange"
-                android:text="downUp"
-                android:textAllCaps="false"
-                android:textSize="10sp" />
-
-            <Button
-                android:id="@+id/button27"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="minusTr2"
-                android:text="-"
-                android:textAllCaps="false"
-                android:textSize="10sp" />
-
-            <Button
-                android:id="@+id/button18"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="showClusteredROI"
-                android:text="clusterROI"
-                android:textAllCaps="false"
-                android:textSize="10sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -302,22 +253,21 @@
 
 
 
-            <Button
-                android:id="@+id/button23"
+            <TextView
+                android:id="@+id/betaTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:onClick="changeToCanny"
-                android:text="Canny"
-                android:textAllCaps="false"
-                android:textSize="10sp" />
+                android:textAllCaps="true"
+     />
+
             <Button
                 android:id="@+id/button12"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:onClick="minusMin_A"
-                android:text="-"
+                android:onClick="betaPlus"
+                android:text="beta +"
                 android:textAllCaps="false"
                 android:textSize="10sp" />
 
@@ -326,8 +276,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:onClick="saveImg"
-                android:text="Save"
+                android:onClick="betaMinus"
+                android:text="beta -"
                 android:textAllCaps="false"
                 android:textSize="10sp" />
 
@@ -343,5 +293,33 @@
                 android:textAllCaps="false"
                 android:textSize="10sp" />
         </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/eT1"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"/>
+
+            <Button
+                android:id="@+id/button31"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="submitKNum"
+                android:text="submitK"
+                android:textAllCaps="false"
+                android:textSize="10sp" />
+
+
+
+        </LinearLayout>
+
     </androidx.appcompat.widget.LinearLayoutCompat>
 </ScrollView>

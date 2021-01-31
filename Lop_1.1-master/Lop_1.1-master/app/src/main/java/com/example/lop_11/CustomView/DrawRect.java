@@ -14,6 +14,8 @@ import com.example.lop_11.R;
 
 import java.util.ArrayList;
 
+import static com.example.lop_11.ImageResize.newW;
+
 public class DrawRect extends View {
 
     Point point1, point3;
@@ -133,7 +135,7 @@ public class DrawRect extends View {
     public static void getCoord() {
 
         if (moved) {
-            int matWidth = 750;
+            int matWidth = newW;
             int screenWidth = 1080;
             xRed = xRed - ((screenWidth - matWidth) / 2);
             xOrg = xOrg - ((screenWidth - matWidth) / 2);

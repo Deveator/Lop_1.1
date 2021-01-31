@@ -11,7 +11,7 @@ import static com.example.lop_11.CustomView.DrawRect.xRed;
 import static com.example.lop_11.CustomView.DrawRect.yGreen;
 import static com.example.lop_11.CustomView.DrawRect.yRed;
 
-public class CotourImage {
+public class ContourImage {
 
     public static int xRed_add;
     public static int yRed_add;

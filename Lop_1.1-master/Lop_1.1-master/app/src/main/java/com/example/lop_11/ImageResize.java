@@ -8,24 +8,40 @@ import org.opencv.imgproc.Imgproc;
 
 public class ImageResize {
 
+    public static int newW = 1;
+
     // method to get image in Mat format resized down 4 times from path
     public static Mat GetResizedImage(String path) {
+        //  int newW = 1;
+        int newH = 1;
+        double ratio;
         Mat orImage = new Mat();
         Mat originImg = Imgcodecs.imread(path);// image is BGR format , try to get format
-    //    Size sz = new Size(150, 200);
+        System.out.println(originImg.size());
+        double w = originImg.cols();
+        double h = originImg.rows();
+        if (w <= 750 && h <= 1000) {
+            newW = (int) w;
+            newH = (int) h;
+        } else if (w > 750) {
+            ratio = w / 750;
+            newW = (int) Math.round(w / ratio);
+            newH = (int) Math.round(h / ratio);
+        } else if (h > 1000) {
+            ratio = h / 1000;
+            newW = (int) Math.round(w / ratio);
+            newH = (int) Math.round(h / ratio);
+        }
 
-       // System.out.println(originImg.size());
-       // System.out.println(originImg.type());
-       // originImg.convertTo(originImg, CvType.CV_32FC2);
-        //int nChannels = originImg.channels();
-      //  System.out.println(originImg.type());
-    //    System.out.println(originImg.channels());
 
-    //    Imgproc.resize(originImg, orImage, sz);
-         orImage = originImg;
-       // Imgproc.cvtColor(orImage, orImage, Imgproc.COLOR_BGR2RGB);
+        Size sz = new Size(newW, newH);
+        Imgproc.resize(originImg, orImage, sz);
+        // orImage = originImg;
+        Imgproc.cvtColor(orImage, orImage, Imgproc.COLOR_BGR2RGB);
+        // size is 750*1000
         return orImage;
     }
+
 
     public static int getXforRect(int x, int imageWidth, int step) {
         int rectX = 0;
