@@ -166,5 +166,25 @@ public class KmeansStuff {
 
     }
 
+    public static void viceVersaColorInWhite(Mat outputImage) {
+
+        for (int n = 0; n < numClust; n++) {
+
+            if (n != preCount) {
+                ArrayList<Integer> y = _Y.get(n);
+                ArrayList<Integer> x = _X.get(n);
+
+                double[] orV = {255.0, 255.0, 255.0};
+                for (int j = 0; j < y.size(); j++) {
+                    int yO = y.get(j) + yRed_km;
+                    int xO = x.get(j) + xRed_km;
+                    outputImage.put(yO, xO, orV);
+                }
+            }
+        }
+
+
+    }
+
 
 }

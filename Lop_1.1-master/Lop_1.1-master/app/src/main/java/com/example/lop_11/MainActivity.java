@@ -45,6 +45,7 @@ import static com.example.lop_11.KmeansStuff.colorInWhite;
 import static com.example.lop_11.KmeansStuff.createColorArrays;
 import static com.example.lop_11.KmeansStuff.returnToOriginal;
 import static com.example.lop_11.KmeansStuff.showClusters;
+import static com.example.lop_11.KmeansStuff.viceVersaColorInWhite;
 import static com.example.lop_11.Lab.diagonal_1;
 import static com.example.lop_11.Lab.diagonal_2;
 import static com.example.lop_11.Lab.diagonal_3;
@@ -561,9 +562,6 @@ public class MainActivity extends AppCompatActivity {
         //  findStarter();
     }
 
-    public void minusMaxIntense(View view) {
-    }
-
     public void upDownChange(View view) {
     }
 
@@ -647,6 +645,14 @@ public class MainActivity extends AppCompatActivity {
     public void saveShow(View view) {
         colorInWhite(oImage);
         displayImage(oImage, iV);
+    }
+
+    public void viseVersa(View view) {
+        viceVersaColorInWhite(oImage);
+        displayImage(oImage, iV);
+        returnToOriginal(oImage);
+        displayImage(oImage, iV);
+
     }
 
     // clear stuff
