@@ -3,6 +3,7 @@ package com.example.lop_11;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -10,6 +11,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -81,7 +85,7 @@ import static org.opencv.imgproc.Imgproc.cvtColor;
 
 public class MainActivity extends AppCompatActivity {
 
-
+    private GestureDetector mDetector;
     TextView alphaTv, betaTv;
     Button bttn7, bttn10, bttn11, bttn12, bttn13, bttn14, bttn24, bttn31;
     public static String path;
@@ -147,6 +151,10 @@ public class MainActivity extends AppCompatActivity {
         bttn14 = findViewById(R.id.button14);
         bttn24 = findViewById(R.id.button24);
         iV = findViewById(R.id.imageV);
+        mDetector = new GestureDetector(this, new MyGestureListener());
+        // Add a touch listener to the view
+        // The touch listener passes all its events on to the gesture detector
+        iV.setOnTouchListener(touchListener);
         iVadd = findViewById(R.id.imageVadd);
         iV2 = findViewById(R.id.imageV2);
         iVadd2 = findViewById(R.id.imageVadd2);
@@ -158,6 +166,67 @@ public class MainActivity extends AppCompatActivity {
         betaTv = findViewById(R.id.betaTv);
         betaTv.setText(String.valueOf(beta));
 
+
+    }
+
+    // This touch listener passes everything on to the gesture detector.
+    // That saves us the trouble of interpreting the raw touch events
+    // ourselves.
+    View.OnTouchListener touchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            // pass the events to the gesture detector
+            // a return value of true means the detector is handling it
+            // a return value of false means the detector didn't
+            // recognize the event
+            return mDetector.onTouchEvent(event);
+
+        }
+    };
+
+    // In the SimpleOnGestureListener subclass you should override
+    // onDown and any other gesture that you want to detect.
+    class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
+
+        @Override
+        public boolean onDown(MotionEvent event) {
+            Log.d("TAG", "onDown: ");
+
+            // don't return false here or else none of the other
+            // gestures will work
+            return true;
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            Log.i("TAG", "onSingleTapConfirmed: ");
+            return true;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+            Log.i("TAG", "onLongPress: ");
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            Log.i("TAG", "onDoubleTap: ");
+            return true;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2,
+                                float distanceX, float distanceY) {
+            Log.i("TAG", "onScroll: ");
+            return true;
+        }
+
+        @Override
+        public boolean onFling(MotionEvent event1, MotionEvent event2,
+                               float velocityX, float velocityY) {
+            Log.d("TAG", "onFling: ");
+            return true;
+        }
     }
 
     public void openGallery(View v) {
@@ -195,16 +264,27 @@ public class MainActivity extends AppCompatActivity {
             Core.LUT(oImage, lookUpTable, img);
 
 */
-           // oImage.convertTo(oImage, -1, 3.0, 100);// make image more contrast
+            // oImage.convertTo(oImage, -1, 3.0, 100);// make image more contrast
             //cvtColor(oImage, oImage, COLOR_BGR2GRAY);// added for idea
             if (g == 0) {
                 displayImage(oImage, iV);
+                System.out.println("----------");
+                System.out.println(getScreenWidth());
+                System.out.println(getScreenHeight());
                 //displayImage(getKMeanImage(oImage), iV2);
                 g++;
             } else {
                 displayImage(oImage, iVadd2);
             }
         }
+    }
+
+    public static int getScreenWidth() {
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
+
+    public static int getScreenHeight() {
+        return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 
     private byte saturate(double val) {
@@ -532,7 +612,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public double getValFromTv(TextView tv){
+    public double getValFromTv(TextView tv) {
         return Double.parseDouble((String) tv.getText());
     }
 
@@ -542,13 +622,12 @@ public class MainActivity extends AppCompatActivity {
         d++;
         alphaTv.setText(String.valueOf(d));
     }
- 
+
     public void alphaMinus(View view) {
         double d = getValFromTv(alphaTv);
         d--;
         alphaTv.setText(String.valueOf(d));
     }
-
 
 
     public void clearROI(View view) {
@@ -611,27 +690,61 @@ public class MainActivity extends AppCompatActivity {
 
     // get mat from ROI and get Kmeans matImage
     public void _1_stage(View view) {
+        // _1_stage
+        // get mat from ROI and get Kmeans matImage
         Mat m1 = KmeansStuff.getMatFromROI_km(oImage);
         kMeansRoi = KmeansStuff.getKMeanImage(m1);
+        //_2_stage
+        // put clustered color of ROI in image for work
+        KmeansStuff.changeRoiInKmeans(kMeansRoi, add_oImage);
+        //_3_stage
+        createColorArrays(kMeansRoi, numClust);
+        //_4_stage
+        // show clusters stepByStep
+        showClusters(oImage);
+        displayImage(oImage, iV);
     }
 
     // put clustered color of ROI in image for work
     public void _2_stage(View view) {
-        KmeansStuff.changeRoiInKmeans(kMeansRoi, add_oImage);
+        // KmeansStuff.changeRoiInKmeans(kMeansRoi, add_oImage);
         //    displayImage(oImage, iV);
-        System.out.println("2 STAGE COMPLETED");
     }
 
     public void _3_stage(View view) {
-        createColorArrays(kMeansRoi, numClust);
-        System.out.println("3 STAGE COMPLETED");
+        // createColorArrays(kMeansRoi, numClust);
+        // System.out.println("3 STAGE COMPLETED");
     }
 
-    // show clusters stepByStep
-    public void _4_stage(View view) {
-        showClusters(oImage);
-        displayImage(oImage, iV);
-        System.out.println("4 STAGE COMPLETED");
+    public void saveImage(View view) {
+
+        // START creating directory for images
+        String root = Environment.getExternalStorageDirectory().toString();
+        File myDir = new File(root + "/App_images");
+        if (!myDir.exists()) {
+            myDir.mkdir();
+        }
+        // STOP creating directory for images
+        Random generator = new Random();
+        int n = 10000;
+        n = generator.nextInt(n);
+        String fname = "Image-" + n + ".jpg";
+        File file = new File(myDir, fname);
+        String imgPath = file.toString();
+        if (file.exists()) file.delete();
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            System.out.println(155);
+            // instead of 'zoomedBitmap' should be another
+            bitmapS.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            out.flush();
+            out.close();
+            Toast.makeText(getApplicationContext(), imgPath + " is saved", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     // return ROI to original color

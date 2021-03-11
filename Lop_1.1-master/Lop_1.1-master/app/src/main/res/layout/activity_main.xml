@@ -138,8 +138,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:onClick="_4_stage"
-                android:text="4_stage"
+                android:onClick="saveImage"
+                android:text="SaveImg"
                 android:textAllCaps="false"
                 android:textSize="10sp" />
 

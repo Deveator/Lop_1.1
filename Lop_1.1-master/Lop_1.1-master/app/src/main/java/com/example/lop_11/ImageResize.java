@@ -1,5 +1,7 @@
 package com.example.lop_11;
 
+import android.util.DisplayMetrics;
+
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
