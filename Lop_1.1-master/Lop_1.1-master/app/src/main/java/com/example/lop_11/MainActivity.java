@@ -45,6 +45,7 @@ import static com.example.lop_11.CustomView.DrawRect.xOrg;
 import static com.example.lop_11.CustomView.DrawRect.xRed;
 import static com.example.lop_11.CustomView.DrawRect.yGreen;
 import static com.example.lop_11.CustomView.DrawRect.yRed;
+import static com.example.lop_11.ImageResize.newW;
 import static com.example.lop_11.KmeansStuff.colorInWhite;
 import static com.example.lop_11.KmeansStuff.createColorArrays;
 import static com.example.lop_11.KmeansStuff.returnToOriginal;
@@ -210,7 +211,19 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
+            int matWidth = newW;
+            int screenWidth = 1080;
+            Log.i("newW", String.valueOf(newW));
             Log.i("TAG", "onDoubleTap: ");
+            int x = (int) e.getX();
+            x = x - (1080 - newW) / 2;
+            Log.i("X", String.valueOf(x));
+            int y = (int) e.getY();
+            Log.i("Y", String.valueOf(y));
+            int s = 25 / 4;
+            Log.i("S", String.valueOf(s));
+
+            displayImage(ZoomStuff.zoomExample(x, y, oImage), iV);
             return true;
         }
 
