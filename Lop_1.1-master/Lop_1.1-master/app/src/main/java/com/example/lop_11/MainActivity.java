@@ -135,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
     public static ArrayList<ArrayList> help123 = new ArrayList<ArrayList>();
     public static boolean start = true;
     public static int g = 0;
+    public static boolean isZoomed = false;
 
 
     @Override
@@ -222,8 +223,8 @@ public class MainActivity extends AppCompatActivity {
             Log.i("Y", String.valueOf(y));
             int s = 25 / 4;
             Log.i("S", String.valueOf(s));
-
-            displayImage(ZoomStuff.zoomExample(x, y, oImage), iV);
+            imgROIfromClustered = ZoomStuff.zoomExample(x, y, oImage);
+            displayImage(imgROIfromClustered, iV);
             return true;
         }
 
@@ -705,7 +706,7 @@ public class MainActivity extends AppCompatActivity {
     public void _1_stage(View view) {
         // _1_stage
         // get mat from ROI and get Kmeans matImage
-        Mat m1 = KmeansStuff.getMatFromROI_km(oImage);
+        Mat m1 = KmeansStuff.getMatFromROI_km(imgROIfromClustered);
         kMeansRoi = KmeansStuff.getKMeanImage(m1);
         //_2_stage
         // put clustered color of ROI in image for work

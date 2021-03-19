@@ -20,6 +20,11 @@ public class ZoomStuff {
         int x_stop = x + (w/4);
         zoomMat = mat.submat(y_start, y_stop, x_start, x_stop);
 
+        System.out.println("*****");
+        System.out.println(zoomMat.cols());
+        System.out.println(zoomMat.rows());
+        System.out.println("*****");
+
 
 
 

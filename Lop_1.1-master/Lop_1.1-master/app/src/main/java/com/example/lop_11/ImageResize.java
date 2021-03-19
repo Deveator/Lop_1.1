@@ -35,6 +35,9 @@ public class ImageResize {
             newH = (int) Math.round(h / ratio);
         }
 
+        newW = getEvenDigit(newW);
+        newH = getEvenDigit(newH);
+
 
         Size sz = new Size(newW, newH);
         Imgproc.resize(originImg, orImage, sz);
@@ -42,6 +45,13 @@ public class ImageResize {
         Imgproc.cvtColor(orImage, orImage, Imgproc.COLOR_BGR2RGB);
         // size is 750*1000
         return orImage;
+    }
+
+    public static int getEvenDigit(int n) {
+        if (n % 2 == 1) {
+            n = n - 1;
+        }
+        return n;
     }
 
 
