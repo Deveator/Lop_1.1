@@ -225,6 +225,7 @@ public class MainActivity extends AppCompatActivity {
             Log.i("S", String.valueOf(s));
             imgROIfromClustered = ZoomStuff.zoomExample(x, y, oImage);
             displayImage(imgROIfromClustered, iV);
+            Log.i("Size", String.valueOf(imgROIfromClustered.size()));
             return true;
         }
 

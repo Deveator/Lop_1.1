@@ -43,6 +43,8 @@ public class ImageResize {
         Imgproc.resize(originImg, orImage, sz);
         // orImage = originImg;
         Imgproc.cvtColor(orImage, orImage, Imgproc.COLOR_BGR2RGB);
+        System.out.println("Resized val");
+        System.out.println(orImage.size());
         // size is 750*1000
         return orImage;
     }
