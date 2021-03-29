@@ -81,17 +81,19 @@ import static com.example.lop_11.LabImage.diffrent_Lab_indexes;
 import static com.example.lop_11.LabImage.diffrent_Lab_values;
 import static com.example.lop_11.LabImage.finalSortedCluster;
 import static com.example.lop_11.LabImage.yx_Values;
+import static com.example.lop_11.ZoomStuff.x4EveryMatPoint;
 import static org.opencv.core.Core.kmeans;
 import static org.opencv.imgproc.Imgproc.cvtColor;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static boolean isChanged = false;
     private GestureDetector mDetector;
     TextView alphaTv, betaTv;
     Button bttn7, bttn10, bttn11, bttn12, bttn13, bttn14, bttn24, bttn31;
     public static String path;
     public static int screenWidth, idealWidth, idealHeight, originalHeight, originalWidth;
-    public static Mat oImageClusterColored, imgROIfromClustered, oImage, add_oImage, kMeansRoi;
+    public static Mat oImageClusterColored, imgROIfromClustered, oImage, add_oImage, kMeansRoi, x4oImage;
     Bitmap bitmapS;
     EditText eT, eT1;
     public static int doubleTapCount = 3;// using in MyImageView class
@@ -212,6 +214,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
+            x4oImage = x4EveryMatPoint(oImage);
             int matWidth = newW;
             int screenWidth = 1080;
             Log.i("newW", String.valueOf(newW));
@@ -264,6 +267,7 @@ public class MainActivity extends AppCompatActivity {
             oImage = ImageResize.GetResizedImage(path);
             add_oImage = ImageResize.GetResizedImage(path);
             oImageClusterColored = ImageResize.GetResizedImage(path);///
+            x4oImage = x4EveryMatPoint(oImage);
             idealWidth = oImage.cols();
             idealHeight = oImage.rows();
             view3.setVisibility(View.INVISIBLE);
@@ -705,9 +709,10 @@ public class MainActivity extends AppCompatActivity {
 
     // get mat from ROI and get Kmeans matImage
     public void _1_stage(View view) {
+        oImage = add_oImage;
         // _1_stage
         // get mat from ROI and get Kmeans matImage
-        Mat m1 = KmeansStuff.getMatFromROI_km(imgROIfromClustered);
+        Mat m1 = KmeansStuff.getMatFromROI_km(oImage);
         kMeansRoi = KmeansStuff.getKMeanImage(m1);
         //_2_stage
         // put clustered color of ROI in image for work
