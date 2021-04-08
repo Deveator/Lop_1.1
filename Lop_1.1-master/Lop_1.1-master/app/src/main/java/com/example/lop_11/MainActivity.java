@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
     Button bttn7, bttn10, bttn11, bttn12, bttn13, bttn14, bttn24, bttn31;
     public static String path;
     public static int screenWidth, idealWidth, idealHeight, originalHeight, originalWidth;
-    public static Mat oImageClusterColored, imgROIfromClustered, oImage, add_oImage, kMeansRoi, x4oImage;
+    public static Mat oImageClusterColored, imgROIfromClustered, oImage, add_oImage, kMeansRoi, imgROIfromClustered_dbl;
     Bitmap bitmapS;
     EditText eT, eT1;
     public static int doubleTapCount = 3;// using in MyImageView class
@@ -138,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
     public static boolean start = true;
     public static int g = 0;
     public static boolean isZoomed = false;
+    public static int count2 = 3;
 
 
     @Override
@@ -214,7 +215,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            x4oImage = x4EveryMatPoint(oImage);
             int matWidth = newW;
             int screenWidth = 1080;
             Log.i("newW", String.valueOf(newW));
@@ -227,10 +227,15 @@ public class MainActivity extends AppCompatActivity {
             int s = 25 / 4;
             Log.i("S", String.valueOf(s));
             imgROIfromClustered = ZoomStuff.zoomExample(x, y, oImage);
+            imgROIfromClustered_dbl = imgROIfromClustered;
             displayImage(imgROIfromClustered, iV);
             Log.i("Size", String.valueOf(imgROIfromClustered.size()));
+            isZoomed = true;
+
+
             return true;
         }
+
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2,
@@ -245,6 +250,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d("TAG", "onFling: ");
             return true;
         }
+
     }
 
     public void openGallery(View v) {
@@ -266,8 +272,7 @@ public class MainActivity extends AppCompatActivity {
             // oImage is main image
             oImage = ImageResize.GetResizedImage(path);
             add_oImage = ImageResize.GetResizedImage(path);
-            oImageClusterColored = ImageResize.GetResizedImage(path);///
-            x4oImage = x4EveryMatPoint(oImage);
+            oImageClusterColored = ImageResize.GetResizedImage(path);//
             idealWidth = oImage.cols();
             idealHeight = oImage.rows();
             view3.setVisibility(View.INVISIBLE);
@@ -709,24 +714,48 @@ public class MainActivity extends AppCompatActivity {
 
     // get mat from ROI and get Kmeans matImage
     public void _1_stage(View view) {
-        oImage = add_oImage;
-        // _1_stage
-        // get mat from ROI and get Kmeans matImage
-        Mat m1 = KmeansStuff.getMatFromROI_km(oImage);
-        kMeansRoi = KmeansStuff.getKMeanImage(m1);
-        //_2_stage
-        // put clustered color of ROI in image for work
-        KmeansStuff.changeRoiInKmeans(kMeansRoi, add_oImage);
-        //_3_stage
-        createColorArrays(kMeansRoi, numClust);
-        //_4_stage
-        // show clusters stepByStep
-        showClusters(oImage);
-        displayImage(oImage, iV);
+        if (isZoomed) {
+            //imgROIfromClustered = imgROIfromClustered_dbl;
+            // _1_stage
+            // get mat from ROI and get Kmeans matImage
+            Mat m1 = KmeansStuff.getMatFromROI_km(imgROIfromClustered);
+            kMeansRoi = KmeansStuff.getKMeanImage(m1);
+            //_2_stage
+            // put clustered color of ROI in image for work
+            KmeansStuff.changeRoiInKmeans(kMeansRoi, imgROIfromClustered_dbl);
+            //_3_stage
+            createColorArrays(kMeansRoi, numClust);
+            //_4_stage
+            // show clusters stepByStep
+         //   showClusters(imgROIfromClustered);
+        //    displayImage(imgROIfromClustered, iV);
+        } else {
+            //oImage = add_oImage;
+            // _1_stage
+            // get mat from ROI and get Kmeans matImage
+            Mat m1 = KmeansStuff.getMatFromROI_km(oImage);
+            kMeansRoi = KmeansStuff.getKMeanImage(m1);
+            //_2_stage
+            // put clustered color of ROI in image for work
+            KmeansStuff.changeRoiInKmeans(kMeansRoi, add_oImage);
+            //_3_stage
+            createColorArrays(kMeansRoi, numClust);
+            //_4_stage
+            // show clusters stepByStep
+            //showClusters(oImage);
+            //displayImage(oImage, iV);
+        }
     }
 
     // put clustered color of ROI in image for work
     public void _2_stage(View view) {
+        if (isZoomed) {
+            showClusters(imgROIfromClustered);
+            displayImage(imgROIfromClustered, iV);
+        } else {
+            showClusters(oImage);
+            displayImage(oImage, iV);
+        }
         // KmeansStuff.changeRoiInKmeans(kMeansRoi, add_oImage);
         //    displayImage(oImage, iV);
     }
@@ -769,8 +798,16 @@ public class MainActivity extends AppCompatActivity {
 
     // return ROI to original color
     public void _5_stage(View view) {
-        returnToOriginal(oImage);
-        displayImage(oImage, iV);
+
+        if (isZoomed) {
+            returnToOriginal(imgROIfromClustered);
+            displayImage(imgROIfromClustered, iV);
+
+        } else {
+            returnToOriginal(oImage);
+            displayImage(oImage, iV);
+        }
+
         System.out.println("5 STAGE COMPLETED");
     }
 
@@ -808,6 +845,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getZoomedBitmap(View view) {
+        displayImage(oImage, iV);
+        isZoomed = false;
     }
 
 }
