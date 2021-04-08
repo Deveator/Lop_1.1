@@ -737,11 +737,11 @@ public class MainActivity extends AppCompatActivity {
     public void _5_stage(View view) {
 
         if (isZoomed) {
-            returnToOriginal(imgROIfromClustered);
+            returnToOriginal(imgROIfromClustered_3, imgROIfromClustered);
             displayImage(imgROIfromClustered, iV);
 
         } else {
-            returnToOriginal(oImage);
+            returnToOriginal(oImageClusterColored, oImage);
             displayImage(oImage, iV);
         }
 
@@ -755,10 +755,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void viseVersa(View view) {
-        viceVersaColorInWhite(oImage);
-        displayImage(oImage, iV);
-        returnToOriginal(oImage);
-        displayImage(oImage, iV);
+        if (isZoomed) {
+            viceVersaColorInWhite(imgROIfromClustered);
+            displayImage(imgROIfromClustered, iV);
+            returnToOriginal(imgROIfromClustered_3, imgROIfromClustered);
+            displayImage(imgROIfromClustered, iV);
+        }else{
+            viceVersaColorInWhite(oImage);
+            displayImage(oImage, iV);
+            returnToOriginal(oImageClusterColored, oImage);
+            displayImage(oImage, iV);
+
+        }
 
     }
 

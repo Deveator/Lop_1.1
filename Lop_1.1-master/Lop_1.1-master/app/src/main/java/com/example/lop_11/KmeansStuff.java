@@ -139,7 +139,7 @@ public class KmeansStuff {
         }
     }
 
-    public static void returnToOriginal(Mat outputImage) {
+    public static void returnToOriginal(Mat inputImage, Mat outputImage) {
 
         ArrayList<Integer> y = _Y.get(preCount);
         ArrayList<Integer> x = _X.get(preCount);
@@ -147,7 +147,7 @@ public class KmeansStuff {
         for (int j = 0; j < y.size(); j++) {
             int yO = y.get(j) + yRed_km;
             int xO = x.get(j) + xRed_km;
-            double[] orV = oImageClusterColored.get(yO, xO);
+            double[] orV = inputImage.get(yO, xO);
             outputImage.put(yO, xO, orV);
         }
     }
