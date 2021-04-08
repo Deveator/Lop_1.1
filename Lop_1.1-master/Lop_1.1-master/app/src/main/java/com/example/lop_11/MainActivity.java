@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
     Button bttn7, bttn10, bttn11, bttn12, bttn13, bttn14, bttn24, bttn31;
     public static String path;
     public static int screenWidth, idealWidth, idealHeight, originalHeight, originalWidth;
-    public static Mat oImageClusterColored, imgROIfromClustered, oImage, add_oImage, kMeansRoi, imgROIfromClustered_dbl;
+    public static Mat oImageClusterColored, imgROIfromClustered, oImage, add_oImage, kMeansRoi, imgROIfromClustered_dbl, imgROIfromClustered_3;
     Bitmap bitmapS;
     EditText eT, eT1;
     public static int doubleTapCount = 3;// using in MyImageView class
@@ -227,8 +227,8 @@ public class MainActivity extends AppCompatActivity {
             int s = 25 / 4;
             Log.i("S", String.valueOf(s));
             imgROIfromClustered = ZoomStuff.zoomExample(x, y, oImage);
-            imgROIfromClustered_dbl = ZoomStuff.zoomExample(x, y, oImage);
-           // imgROIfromClustered_dbl = imgROIfromClustered;
+            imgROIfromClustered_dbl = imgROIfromClustered.clone();
+            imgROIfromClustered_3 = imgROIfromClustered.clone();
             displayImage(imgROIfromClustered, iV);
             Log.i("Size", String.valueOf(imgROIfromClustered.size()));
             isZoomed = true;
@@ -272,31 +272,17 @@ public class MainActivity extends AppCompatActivity {
             screenWidth = displayMetrics.widthPixels;
             // oImage is main image
             oImage = ImageResize.GetResizedImage(path);
-            add_oImage = ImageResize.GetResizedImage(path);
-            oImageClusterColored = ImageResize.GetResizedImage(path);//
+            add_oImage = oImage.clone();
+            oImageClusterColored = oImage.clone();
             idealWidth = oImage.cols();
             idealHeight = oImage.rows();
             view3.setVisibility(View.INVISIBLE);
 
-/*
-            Mat lookUpTable = new Mat(1, 256, CvType.CV_8U);
-            byte[] lookUpTableData = new byte[(int) (lookUpTable.total()*lookUpTable.channels())];
-            for (int i = 0; i < lookUpTable.cols(); i++) {
-                lookUpTableData[i] = saturate(Math.pow(i / 255.0, 1.2) * 255.0);
-            }
-            lookUpTable.put(0, 0, lookUpTableData);
-            Mat img = new Mat();
-            Core.LUT(oImage, lookUpTable, img);
-
-*/
-            // oImage.convertTo(oImage, -1, 3.0, 100);// make image more contrast
-            //cvtColor(oImage, oImage, COLOR_BGR2GRAY);// added for idea
             if (g == 0) {
                 displayImage(oImage, iV);
                 System.out.println("----------");
                 System.out.println(getScreenWidth());
                 System.out.println(getScreenHeight());
-                //displayImage(getKMeanImage(oImage), iV2);
                 g++;
             } else {
                 displayImage(oImage, iVadd2);
@@ -317,34 +303,6 @@ public class MainActivity extends AppCompatActivity {
         iVal = iVal > 255 ? 255 : (iVal < 0 ? 0 : iVal);
         return (byte) iVal;
     }
-
- /*   public Mat getKMeanImage(Mat img) {
-
-        img.convertTo(img, CvType.CV_32F);
-        Mat data = img.reshape(1, (int) img.total());
-        int K = 4;
-        Mat bestLabels = new Mat();
-        TermCriteria criteria = new TermCriteria();
-        int attempts = 5;
-        int flags = Core.KMEANS_PP_CENTERS;
-        Mat centers = new Mat();
-        double compactness = Core.kmeans(data, K, bestLabels, criteria, attempts, flags, centers);
-
-        Mat draw = new Mat((int) img.total(), 1, CvType.CV_32FC3);
-        Mat colors = centers.reshape(3, K);
-        for (int i = 0; i < K; i++) {
-            Mat mask = new Mat(); // a mask for each cluster label
-            Core.compare(bestLabels, new Scalar(i), mask, Core.CMP_EQ);
-            Mat col = colors.row(i); // can't use the Mat directly with setTo() (see #19100)
-            double d[] = col.get(0, 0); // can't create Scalar directly from get(), 3 vs 4 elements
-            draw.setTo(new Scalar(d[0], d[1], d[2]), mask);
-        }
-        draw = draw.reshape(3, img.rows());
-        draw.convertTo(draw, CvType.CV_8U);
-        System.out.println(draw.type());
-        return draw;
-    }
-    */
 
     private String getPath(Uri uri) {
         if (uri == null) {
@@ -489,10 +447,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-
-        // for (int i = 0; i < allColors_AL_sorted.size(); i++) {
-        //      System.out.println("allColors_AL_sorted get " + i + " " + allColors_AL_sorted.get(i).size());
-        //   }
     }
 
     // color in white every color section
@@ -741,8 +695,6 @@ public class MainActivity extends AppCompatActivity {
             showClusters(oImage);
             displayImage(oImage, iV);
         }
-        // KmeansStuff.changeRoiInKmeans(kMeansRoi, add_oImage);
-        //    displayImage(oImage, iV);
     }
 
     public void _3_stage(View view) {
