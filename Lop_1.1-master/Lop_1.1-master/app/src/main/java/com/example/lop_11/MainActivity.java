@@ -227,7 +227,8 @@ public class MainActivity extends AppCompatActivity {
             int s = 25 / 4;
             Log.i("S", String.valueOf(s));
             imgROIfromClustered = ZoomStuff.zoomExample(x, y, oImage);
-            imgROIfromClustered_dbl = imgROIfromClustered;
+            imgROIfromClustered_dbl = ZoomStuff.zoomExample(x, y, oImage);
+           // imgROIfromClustered_dbl = imgROIfromClustered;
             displayImage(imgROIfromClustered, iV);
             Log.i("Size", String.valueOf(imgROIfromClustered.size()));
             isZoomed = true;
@@ -715,35 +716,19 @@ public class MainActivity extends AppCompatActivity {
     // get mat from ROI and get Kmeans matImage
     public void _1_stage(View view) {
         if (isZoomed) {
-            //imgROIfromClustered = imgROIfromClustered_dbl;
-            // _1_stage
             // get mat from ROI and get Kmeans matImage
             Mat m1 = KmeansStuff.getMatFromROI_km(imgROIfromClustered);
             kMeansRoi = KmeansStuff.getKMeanImage(m1);
-            //_2_stage
             // put clustered color of ROI in image for work
             KmeansStuff.changeRoiInKmeans(kMeansRoi, imgROIfromClustered_dbl);
-            //_3_stage
             createColorArrays(kMeansRoi, numClust);
-            //_4_stage
-            // show clusters stepByStep
-         //   showClusters(imgROIfromClustered);
-        //    displayImage(imgROIfromClustered, iV);
         } else {
-            //oImage = add_oImage;
-            // _1_stage
             // get mat from ROI and get Kmeans matImage
             Mat m1 = KmeansStuff.getMatFromROI_km(oImage);
             kMeansRoi = KmeansStuff.getKMeanImage(m1);
-            //_2_stage
             // put clustered color of ROI in image for work
             KmeansStuff.changeRoiInKmeans(kMeansRoi, add_oImage);
-            //_3_stage
             createColorArrays(kMeansRoi, numClust);
-            //_4_stage
-            // show clusters stepByStep
-            //showClusters(oImage);
-            //displayImage(oImage, iV);
         }
     }
 
