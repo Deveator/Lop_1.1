@@ -750,8 +750,14 @@ public class MainActivity extends AppCompatActivity {
 
     // recolor in white
     public void saveShow(View view) {
-        colorInWhite(oImage);
-        displayImage(oImage, iV);
+        if (isZoomed) {
+            colorInWhite(imgROIfromClustered);
+            displayImage(imgROIfromClustered, iV);
+
+        } else {
+            colorInWhite(oImage);
+            displayImage(oImage, iV);
+        }
     }
 
     public void viseVersa(View view) {
@@ -760,7 +766,7 @@ public class MainActivity extends AppCompatActivity {
             displayImage(imgROIfromClustered, iV);
             returnToOriginal(imgROIfromClustered_3, imgROIfromClustered);
             displayImage(imgROIfromClustered, iV);
-        }else{
+        } else {
             viceVersaColorInWhite(oImage);
             displayImage(oImage, iV);
             returnToOriginal(oImageClusterColored, oImage);
