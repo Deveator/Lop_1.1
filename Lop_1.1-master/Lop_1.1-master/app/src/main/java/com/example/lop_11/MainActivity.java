@@ -81,7 +81,13 @@ import static com.example.lop_11.LabImage.diffrent_Lab_indexes;
 import static com.example.lop_11.LabImage.diffrent_Lab_values;
 import static com.example.lop_11.LabImage.finalSortedCluster;
 import static com.example.lop_11.LabImage.yx_Values;
+import static com.example.lop_11.ZoomStuff.insertZoomedInOrg;
+import static com.example.lop_11.ZoomStuff.returnFromX4EveryMatPoint;
 import static com.example.lop_11.ZoomStuff.x4EveryMatPoint;
+import static com.example.lop_11.ZoomStuff.x_start;
+import static com.example.lop_11.ZoomStuff.x_stop;
+import static com.example.lop_11.ZoomStuff.y_start;
+import static com.example.lop_11.ZoomStuff.y_stop;
 import static org.opencv.core.Core.kmeans;
 import static org.opencv.imgproc.Imgproc.cvtColor;
 
@@ -597,9 +603,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void alphaPlus(View view) {
+        insertZoomedInOrg(imgROIfromClustered, oImage, y_start, y_stop, x_start, x_stop);
+        displayImage(oImage, iV);
+        /*
         double d = getValFromTv(alphaTv);
         d++;
-        alphaTv.setText(String.valueOf(d));
+        alphaTv.setText(String.valueOf(d));*/
     }
 
     public void alphaMinus(View view) {
@@ -697,9 +706,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     public void _3_stage(View view) {
-        // createColorArrays(kMeansRoi, numClust);
-        // System.out.println("3 STAGE COMPLETED");
+        imgROIfromClustered = returnFromX4EveryMatPoint(imgROIfromClustered);
+        displayImage(imgROIfromClustered, iV);
+        Log.i("Size fromX4", String.valueOf(imgROIfromClustered.size()));
+        System.out.println("3 STAGE COMPLETED");
     }
 
     public void saveImage(View view) {
