@@ -1,5 +1,7 @@
 package com.example.lop_11;
 
+import android.util.Log;
+
 import org.opencv.core.Mat;
 
 import java.util.Arrays;
@@ -19,7 +21,33 @@ public class ZoomStuff {
         x_start = x - (w / 4);
         x_stop = x_start + (w / 2);
 
+        if (y_start < 0) {
+            y_start = 0;
+            y_stop = (h / 2);
+        }
+
+        if (y_stop > h) {
+            y_stop = h;
+            y_start = h / 2;
+        }
+
+        if (x_start < 0) {
+            x_start = 0;
+            x_stop = w / 2;
+        }
+
+        if (x_stop > w) {
+            x_stop = w;
+            x_start = w / 2;
+        }
+
         zoomMat = mat.submat(y_start, y_stop, x_start, x_stop);
+        Log.d("y_start ", String.valueOf(y_start));
+        Log.d("y_stop ", String.valueOf(y_stop));
+        Log.d("x_start ", String.valueOf(x_start));
+        Log.d("x_stop ", String.valueOf(x_stop));
+        Log.d("zoomMat cols ", String.valueOf(zoomMat.cols()));
+        Log.d("zoomMat rows ", String.valueOf(zoomMat.rows()));
         zoomMat2 = x4EveryMatPoint(zoomMat);
 
         return zoomMat2;

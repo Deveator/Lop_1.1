@@ -230,8 +230,6 @@ public class MainActivity extends AppCompatActivity {
             Log.i("X", String.valueOf(x));
             int y = (int) e.getY();
             Log.i("Y", String.valueOf(y));
-            int s = 25 / 4;
-            Log.i("S", String.valueOf(s));
             imgROIfromClustered = ZoomStuff.zoomExample(x, y, oImage);
             imgROIfromClustered_dbl = imgROIfromClustered.clone();
             imgROIfromClustered_3 = imgROIfromClustered.clone();
@@ -741,8 +739,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 
     // return ROI to original color
