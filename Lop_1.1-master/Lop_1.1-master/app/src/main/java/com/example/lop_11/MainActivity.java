@@ -619,6 +619,7 @@ public class MainActivity extends AppCompatActivity {
     public void alphaPlus(View view) {
         insertZoomedInOrg(imgROIfromClustered, oImage, y_start, y_stop, x_start, x_stop);
         displayImage(oImage, iV);
+        isZoomed = false;
         /*
         double d = getValFromTv(alphaTv);
         d++;
