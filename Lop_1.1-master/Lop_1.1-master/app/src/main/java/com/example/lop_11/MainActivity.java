@@ -695,7 +695,7 @@ public class MainActivity extends AppCompatActivity {
     public void _1_stage(View view) {
         if (isZoomed) {
             // get mat from ROI and get Kmeans matImage
-            Mat m1 = KmeansStuff.getMatFromROI_km(imgROIfromClustered);
+            Mat m1 = KmeansStuff.getMatFromROI_km(imgROIfromClustered_3);
             kMeansRoi = KmeansStuff.getKMeanImage(m1);
             // put clustered color of ROI in image for work
             KmeansStuff.changeRoiInKmeans(kMeansRoi, imgROIfromClustered_dbl);
