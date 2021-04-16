@@ -89,11 +89,13 @@ public class KmeansStuff {
 
     public static void changeRoiInKmeans(Mat inputM, Mat outputM) {
 
+        Mat m = outputM.clone();
+
         double[] dVal;
         for (int yStart = yRed_km, y = 0; yStart < yGreen_km; yStart++, y++) {
             for (int xStart = xRed_km, x = 0; xStart < xOrg_km; xStart++, x++) {
                 dVal = inputM.get(y, x);
-                outputM.put(yStart, xStart, dVal);
+                m.put(yStart, xStart, dVal);
             }
         }
     }

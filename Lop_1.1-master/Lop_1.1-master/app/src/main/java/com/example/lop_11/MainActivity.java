@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
     Button bttn7, bttn10, bttn11, bttn12, bttn13, bttn14, bttn24, bttn31;
     public static String path;
     public static int screenWidth, idealWidth, idealHeight, originalHeight, originalWidth;
-    public static Mat oImageClusterColored, imgROIfromClustered, oImage, add_oImage, kMeansRoi, imgROIfromClustered_dbl, imgROIfromClustered_3;
+    public static Mat oImageClusterColored, imgROIfromClustered, oImage, notChangedOImage, add_oImage, kMeansRoi, imgROIfromClustered_dbl, imgROIfromClustered_3;
     Bitmap bitmapS;
     EditText eT, eT1;
     public static int doubleTapCount = 3;// using in MyImageView class
@@ -277,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
             // oImage is main image
             oImage = ImageResize.GetResizedImage(path);
             add_oImage = oImage.clone();
+            notChangedOImage = oImage.clone();
             oImageClusterColored = oImage.clone();
             idealWidth = oImage.cols();
             idealHeight = oImage.rows();
@@ -583,14 +584,29 @@ public class MainActivity extends AppCompatActivity {
 
     //make white
     public void fullWhite(View view) {
-        DrawRect.getCoord();
-        double[] whiteClr = {255.0, 255.0, 255.0};
-        for (int i = xRed; i < xOrg; i++) {
-            for (int j = yRed; j < yGreen; j++) {
-                oImage.put(j, i, whiteClr);
+        if (isZoomed) {
+
+            DrawRect.getCoord();
+            double[] whiteClr = {255.0, 255.0, 255.0};
+            for (int i = xRed; i < xOrg; i++) {
+                for (int j = yRed; j < yGreen; j++) {
+                    imgROIfromClustered.put(j, i, whiteClr);
+                }
             }
+            displayImage(imgROIfromClustered, iV);
+
+
+
+        } else {
+            DrawRect.getCoord();
+            double[] whiteClr = {255.0, 255.0, 255.0};
+            for (int i = xRed; i < xOrg; i++) {
+                for (int j = yRed; j < yGreen; j++) {
+                    oImage.put(j, i, whiteClr);
+                }
+            }
+            displayImage(oImage, iV);
         }
-        displayImage(oImage, iV);
 
 
     }
@@ -685,7 +701,7 @@ public class MainActivity extends AppCompatActivity {
             createColorArrays(kMeansRoi, numClust);
         } else {
             // get mat from ROI and get Kmeans matImage
-            Mat m1 = KmeansStuff.getMatFromROI_km(oImage);
+            Mat m1 = KmeansStuff.getMatFromROI_km(notChangedOImage);
             kMeansRoi = KmeansStuff.getKMeanImage(m1);
             // put clustered color of ROI in image for work
             KmeansStuff.changeRoiInKmeans(kMeansRoi, add_oImage);
@@ -761,7 +777,6 @@ public class MainActivity extends AppCompatActivity {
         if (isZoomed) {
             colorInWhite(imgROIfromClustered);
             displayImage(imgROIfromClustered, iV);
-
         } else {
             colorInWhite(oImage);
             displayImage(oImage, iV);
