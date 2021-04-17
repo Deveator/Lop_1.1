@@ -16,6 +16,7 @@ import static com.example.lop_11.CustomView.DrawRect.xOrg;
 import static com.example.lop_11.CustomView.DrawRect.xRed;
 import static com.example.lop_11.CustomView.DrawRect.yGreen;
 import static com.example.lop_11.CustomView.DrawRect.yRed;
+import static com.example.lop_11.LabImage.hasWhiteSpace;
 import static com.example.lop_11.MainActivity.add_oImage;
 import static com.example.lop_11.MainActivity.getListColor;
 import static com.example.lop_11.MainActivity.numClust;
@@ -44,6 +45,8 @@ public class KmeansStuff {
 
         DrawRect.getCoord();
         Mat sMat = inputImage.submat(yRed, yGreen, xRed, xOrg);
+
+        hasWhiteSpace(sMat);
 
         yRed_km = yRed;
         yGreen_km = yGreen;

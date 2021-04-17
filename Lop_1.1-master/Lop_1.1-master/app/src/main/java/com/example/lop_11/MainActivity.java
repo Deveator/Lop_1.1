@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
     Button bttn7, bttn10, bttn11, bttn12, bttn13, bttn14, bttn24, bttn31;
     public static String path;
     public static int screenWidth, idealWidth, idealHeight, originalHeight, originalWidth;
-    public static Mat oImageClusterColored, imgROIfromClustered, oImage, notChangedOImage, add_oImage, kMeansRoi, imgROIfromClustered_dbl, imgROIfromClustered_3;
+    public static Mat oImageClusterColored, imgROIfromClustered, oImage, notChangedOImage, add_oImage, kMeansRoi, imgROIfromClustered_dbl, imgROIfromClustered_3, imgROIfromClustered_notChanged;
     Bitmap bitmapS;
     EditText eT, eT1;
     public static int doubleTapCount = 3;// using in MyImageView class
@@ -231,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
             int y = (int) e.getY();
             Log.i("Y", String.valueOf(y));
             imgROIfromClustered = ZoomStuff.zoomExample(x, y, oImage);
+            imgROIfromClustered_notChanged = ZoomStuff.zoomExample(x, y, notChangedOImage);
             imgROIfromClustered_dbl = imgROIfromClustered.clone();
             imgROIfromClustered_3 = imgROIfromClustered.clone();
             displayImage(imgROIfromClustered, iV);
@@ -695,7 +696,7 @@ public class MainActivity extends AppCompatActivity {
     public void _1_stage(View view) {
         if (isZoomed) {
             // get mat from ROI and get Kmeans matImage
-            Mat m1 = KmeansStuff.getMatFromROI_km(imgROIfromClustered_3);
+            Mat m1 = KmeansStuff.getMatFromROI_km(imgROIfromClustered);
             kMeansRoi = KmeansStuff.getKMeanImage(m1);
             // put clustered color of ROI in image for work
             KmeansStuff.changeRoiInKmeans(kMeansRoi, imgROIfromClustered_dbl);

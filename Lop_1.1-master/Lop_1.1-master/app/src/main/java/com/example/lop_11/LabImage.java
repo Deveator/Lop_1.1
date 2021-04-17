@@ -1,9 +1,12 @@
 package com.example.lop_11;
 
+import android.util.Log;
+
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 import static com.example.lop_11.CustomView.DrawRect.xRed;
@@ -31,6 +34,29 @@ public class LabImage {
     public static ArrayList<ArrayList> finalSortedCluster = new ArrayList<ArrayList>();
     public static ArrayList<ArrayList> all_diffX_Values = new ArrayList<ArrayList>();
     public static ArrayList<ArrayList> all_diffY_Values = new ArrayList<ArrayList>();
+
+
+    // check has ROI white space
+    public static boolean hasWhiteSpace(Mat mat) {
+        boolean has = false;
+        Mat grMat = new Mat();
+        Imgproc.cvtColor(mat, grMat, Imgproc.COLOR_RGB2GRAY);
+        for (int x = 0; x < grMat.cols(); x++) {
+            for (int y = 0; y < grMat.rows(); y++) {
+                double[] d = grMat.get(y, x);
+                int v = (int) d[0];
+                if (v == 255) {
+                    has = true;
+                    break;
+                }
+            }
+            if (has) {
+                break;
+            }
+        }
+        return has;
+    }
+
 
     public static void getClustersFromLabROIImg(Mat mat) {
 
