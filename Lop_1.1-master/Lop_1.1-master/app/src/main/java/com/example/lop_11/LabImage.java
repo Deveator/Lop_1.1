@@ -57,6 +57,14 @@ public class LabImage {
         return has;
     }
 
+    public static void getNumOfSquares (Mat mat){
+        if(hasWhiteSpace(mat)){
+
+
+
+        }
+    }
+
 
     public static void getClustersFromLabROIImg(Mat mat) {
 

@@ -28,8 +28,10 @@ import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.TermCriteria;
+import org.opencv.imgproc.Imgproc;
 
 
 import java.io.File;
@@ -80,6 +82,7 @@ import static com.example.lop_11.LabImage.diffL_Values;
 import static com.example.lop_11.LabImage.diffrent_Lab_indexes;
 import static com.example.lop_11.LabImage.diffrent_Lab_values;
 import static com.example.lop_11.LabImage.finalSortedCluster;
+import static com.example.lop_11.LabImage.hasWhiteSpace;
 import static com.example.lop_11.LabImage.yx_Values;
 import static com.example.lop_11.ZoomStuff.insertZoomedInOrg;
 import static com.example.lop_11.ZoomStuff.returnFromX4EveryMatPoint;
@@ -89,6 +92,7 @@ import static com.example.lop_11.ZoomStuff.x_stop;
 import static com.example.lop_11.ZoomStuff.y_start;
 import static com.example.lop_11.ZoomStuff.y_stop;
 import static org.opencv.core.Core.kmeans;
+import static org.opencv.imgproc.Imgproc.THRESH_TOZERO;
 import static org.opencv.imgproc.Imgproc.cvtColor;
 
 public class MainActivity extends AppCompatActivity {
@@ -597,7 +601,6 @@ public class MainActivity extends AppCompatActivity {
             displayImage(imgROIfromClustered, iV);
 
 
-
         } else {
             DrawRect.getCoord();
             double[] whiteClr = {255.0, 255.0, 255.0};
@@ -628,9 +631,45 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void alphaMinus(View view) {
+
+
+        Mat grMat = new Mat();
+        Mat m1 = KmeansStuff.getMatFromROI_km(oImage);
+        Imgproc.cvtColor(m1, grMat, Imgproc.COLOR_RGB2GRAY);
+
+
+
+        Imgproc.threshold(grMat, grMat, 254, 254, THRESH_TOZERO );
+      //  displayImage(grMat, iVadd);
+
+
+
+
+        Imgproc.Canny(grMat, grMat, 50, 200, 3, false);
+        // Standard Hough Line Transform
+        Mat lines = new Mat(); // will hold the results of the detection
+        Imgproc.HoughLines(grMat, lines, 1, Math.PI / 180, 150); // runs the actual detection
+        // Draw the lines
+        for (int x = 0; x < lines.rows(); x++) {
+            double rho = lines.get(x, 0)[0],
+                    theta = lines.get(x, 0)[1];
+            double a = Math.cos(theta), b = Math.sin(theta);
+            double x0 = a * rho, y0 = b * rho;
+            Point pt1 = new Point(Math.round(x0 + 1000 * (-b)), Math.round(y0 + 1000 * (a)));
+            Point pt2 = new Point(Math.round(x0 - 1000 * (-b)), Math.round(y0 - 1000 * (a)));
+            Imgproc.line(grMat, pt1, pt2, new Scalar(0, 0, 255), 3, Imgproc.LINE_AA, 0);
+        }
+
+
+        displayImage(grMat, iVadd);
+
+
+
+      /*
         double d = getValFromTv(alphaTv);
         d--;
         alphaTv.setText(String.valueOf(d));
+        */
     }
 
 
@@ -643,14 +682,6 @@ public class MainActivity extends AppCompatActivity {
         findChangeDirectionPoints();
         findPoligon();
         //  findStarter();
-    }
-
-    public void upDownChange(View view) {
-    }
-
-    public void downUpChange(View view) {
-        //   getClusterStep();
-        //   System.out.println(clusterStep);
     }
 
     public void setClusterStep() {
@@ -823,6 +854,16 @@ public class MainActivity extends AppCompatActivity {
     public void getZoomedBitmap(View view) {
         displayImage(oImage, iV);
         isZoomed = false;
+    }
+
+    public void betaMinus(View view) {
+
+        System.out.println(oImage.size());
+        Mat m = oImage.submat(0,oImage.rows(),0,250);
+        System.out.println(m.size());
+
+
+
     }
 
 }
