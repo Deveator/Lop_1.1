@@ -631,19 +631,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void alphaMinus(View view) {
-
-
         Mat grMat = new Mat();
         Mat m1 = KmeansStuff.getMatFromROI_km(oImage);
         Imgproc.cvtColor(m1, grMat, Imgproc.COLOR_RGB2GRAY);
-
-
-
         Imgproc.threshold(grMat, grMat, 254, 254, THRESH_TOZERO );
       //  displayImage(grMat, iVadd);
-
-
-
 
         Imgproc.Canny(grMat, grMat, 50, 200, 3, false);
         // Standard Hough Line Transform

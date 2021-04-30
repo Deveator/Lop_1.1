@@ -57,12 +57,32 @@ public class LabImage {
         return has;
     }
 
-    public static void getNumOfSquares (Mat mat){
-        if(hasWhiteSpace(mat)){
-
+    public static void getNumOfSquares(Mat mat) {
+        if (hasWhiteSpace(mat)) {
 
 
         }
+    }
+
+    public static void findLines(Mat mat) {
+
+        ArrayList<Integer> X_lines = new ArrayList<Integer>();
+        ArrayList<Integer> Y_lines = new ArrayList<Integer>();
+        double[] val = mat.get(25, 25);
+        int pointVal = 25;
+
+        for (int y = 0; y < mat.rows(); y++) {
+            for (int x = 0; x < mat.cols(); x++) {
+                val = mat.get(y, x);
+                pointVal = (int) val[0];
+                if(pointVal == 255){
+                    Y_lines.add(y);
+                    X_lines.add(x);
+                }
+            }
+        }
+
+        
     }
 
 
