@@ -2,6 +2,7 @@ package com.example.lop_11;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -15,8 +16,11 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -111,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
     public static double alpha = 1.0;
     public static double beta = 0.0;
     View view3;
+    Spinner spinner;
     MyImageView iV, iVadd;
     MyImageView iV2, iVadd2;
     static int m = 3;
@@ -181,8 +186,32 @@ public class MainActivity extends AppCompatActivity {
         betaTv = findViewById(R.id.betaTv);
         betaTv.setText(String.valueOf(beta));
 
+        spinner = (Spinner) findViewById(R.id.spinner);
+// Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.spinner_array, android.R.layout.simple_spinner_item);
+// Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+// Apply the adapter to the spinner
+        spinner.setAdapter(adapter);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id) {
+                // TODO Auto-generated method stub
+                String ss = spinner.getSelectedItem().toString();
+                Toast.makeText(getBaseContext(), ss, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+                // TODO Auto-generated method stub
+            }
+        });
+
 
     }
+
 
     // This touch listener passes everything on to the gesture detector.
     // That saves us the trouble of interpreting the raw touch events
@@ -634,8 +663,8 @@ public class MainActivity extends AppCompatActivity {
         Mat grMat = new Mat();
         Mat m1 = KmeansStuff.getMatFromROI_km(oImage);
         Imgproc.cvtColor(m1, grMat, Imgproc.COLOR_RGB2GRAY);
-        Imgproc.threshold(grMat, grMat, 254, 254, THRESH_TOZERO );
-      //  displayImage(grMat, iVadd);
+        Imgproc.threshold(grMat, grMat, 254, 254, THRESH_TOZERO);
+        //  displayImage(grMat, iVadd);
 
         Imgproc.Canny(grMat, grMat, 50, 200, 3, false);
         // Standard Hough Line Transform
@@ -851,9 +880,8 @@ public class MainActivity extends AppCompatActivity {
     public void betaMinus(View view) {
 
         System.out.println(oImage.size());
-        Mat m = oImage.submat(0,oImage.rows(),0,250);
+        Mat m = oImage.submat(0, oImage.rows(), 0, 250);
         System.out.println(m.size());
-
 
 
     }

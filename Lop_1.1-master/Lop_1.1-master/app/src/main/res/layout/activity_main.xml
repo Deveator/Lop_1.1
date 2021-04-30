@@ -317,6 +317,14 @@
                 android:textAllCaps="false"
                 android:textSize="10sp" />
 
+            <Spinner
+                android:id="@+id/spinner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="opt"
+                android:textSize="10sp"
+                android:layout_weight="1" />
+
 
 
         </LinearLayout>
