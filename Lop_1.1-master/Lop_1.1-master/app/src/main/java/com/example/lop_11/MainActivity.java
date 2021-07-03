@@ -29,12 +29,22 @@ import com.example.lop_11.CustomView.MyImageView;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
+import org.opencv.core.DMatch;
+import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDMatch;
+import org.opencv.core.MatOfKeyPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.core.TermCriteria;
+import org.opencv.features2d.DescriptorMatcher;
+import org.opencv.features2d.KAZE;
 import org.opencv.imgproc.Imgproc;
 
 
@@ -42,6 +52,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -99,7 +111,7 @@ import static org.opencv.core.Core.kmeans;
 import static org.opencv.imgproc.Imgproc.THRESH_TOZERO;
 import static org.opencv.imgproc.Imgproc.cvtColor;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     private static boolean isChanged = false;
     private GestureDetector mDetector;
@@ -117,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
     View view3;
     Spinner spinner;
     MyImageView iV, iVadd;
+    MyImageView submatL, submatR;
     MyImageView iV2, iVadd2;
     static int m = 3;
     static int m2 = 3;
@@ -176,6 +189,8 @@ public class MainActivity extends AppCompatActivity {
         // The touch listener passes all its events on to the gesture detector
         iV.setOnTouchListener(touchListener);
         iVadd = findViewById(R.id.imageVadd);
+        submatL = findViewById(R.id.submatL);
+        submatR = findViewById(R.id.submatR);
         iV2 = findViewById(R.id.imageV2);
         iVadd2 = findViewById(R.id.imageVadd2);
         view3 = findViewById(R.id.imageV5);
@@ -187,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
         betaTv.setText(String.valueOf(beta));
 
         spinner = (Spinner) findViewById(R.id.spinner);
+        spinner.setOnItemSelectedListener(this);
 // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.spinner_array, android.R.layout.simple_spinner_item);
@@ -195,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
 // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+   /*     spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id) {
                 // TODO Auto-generated method stub
@@ -208,10 +224,9 @@ public class MainActivity extends AppCompatActivity {
                 // TODO Auto-generated method stub
             }
         });
-
+*/
 
     }
-
 
     // This touch listener passes everything on to the gesture detector.
     // That saves us the trouble of interpreting the raw touch events
@@ -227,6 +242,189 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        Mat left = new Mat();
+        Mat right= new Mat();
+        String ss = spinner.getSelectedItem().toString();
+       // displayImage(oImage, iV);
+        switch(ss){
+            case("Rotate") :
+                StitchAction.rotate(oImage, 90);
+                displayImage(oImage, iV);
+                System.out.println(oImage.cols());
+                System.out.println(oImage.rows());
+                break;
+
+            case("Submat"):
+                left = oImage.submat(0,oImage.rows() - 1, 0, 500);
+                displayImage(left, submatL);
+
+                right = oImage.submat(0,oImage.rows() - 1, 250, oImage.cols() - 1);
+                displayImage(right, submatR);
+
+                break;
+
+            case("Stitch"):
+
+                long startTime = System.nanoTime();
+
+                Imgproc.cvtColor(left, left, Imgproc.COLOR_RGB2GRAY);
+                Imgproc.cvtColor(right, right, Imgproc.COLOR_RGB2GRAY);
+
+                // At this point search for keypoints in both images and compute the matches
+                MatOfKeyPoint keyPoints1 = new MatOfKeyPoint();
+                MatOfKeyPoint keyPoints2 = new MatOfKeyPoint();
+
+                Mat descriptors1 = new Mat();
+                Mat descriptors2 = new Mat();
+                // Since FeatureDetector and Descriptor extractor are marked deprecated and
+                // crash whatever value they get, use this construct for detecting and computing...
+                // Source: https://stackoverflow.com/questions/36691050/opencv-3-list-of-available-featuredetectorcreate-and-descriptorextractorc
+                KAZE kaze = KAZE.create();
+                kaze.detect(left, keyPoints1);
+                kaze.detect(right, keyPoints2);
+                kaze.compute(left, keyPoints1, descriptors1);
+                kaze.compute(right, keyPoints2, descriptors2);
+
+                MatOfDMatch matches = new MatOfDMatch();
+
+                DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.FLANNBASED);
+                matcher.match(descriptors1, descriptors2, matches);
+
+                // Calculate min and max distance between the keypoints in the two images.
+                double max_dist = 0; double min_dist = 100;
+                List<DMatch> listMatches = matches.toList();
+
+                for( int i = 0; i < listMatches.size(); i++ ) {
+                    double dist = listMatches.get(i).distance;
+                    if( dist < min_dist ) min_dist = dist;
+                    if( dist > max_dist ) max_dist = dist;
+                }
+                Log.i(this.getClass().getSimpleName(), "Min: " + min_dist);
+                Log.i(this.getClass().getSimpleName(), "Max: " + max_dist);
+
+                // Reduce the list of matching keypoints to a list of good matches...
+                LinkedList<DMatch> good_matches = new LinkedList<DMatch>();
+                MatOfDMatch goodMatches = new MatOfDMatch();
+                for(int i = 0; i < listMatches.size(); i++) {
+                    if(listMatches.get(i).distance < 2*min_dist) {
+                        good_matches.addLast(listMatches.get(i));
+                    }
+                }
+
+                goodMatches.fromList(good_matches);
+                Log.i(this.getClass().getSimpleName(), "Number of matches: " + listMatches.size());
+                Log.i(this.getClass().getSimpleName(), "Number of good matches: " + good_matches.size());
+
+                // Calculate the homograohy between the two images...
+                LinkedList<Point> imgPoints1List = new LinkedList<Point>();
+                LinkedList<Point> imgPoints2List = new LinkedList<Point>();
+                List<KeyPoint> keypoints1List = keyPoints1.toList();
+                List<KeyPoint> keypoints2List = keyPoints2.toList();
+
+                for(int i = 0; i<good_matches.size(); i++) {
+                    imgPoints1List.addLast(keypoints1List.get(good_matches.get(i).queryIdx).pt);
+                    imgPoints2List.addLast(keypoints2List.get(good_matches.get(i).trainIdx).pt);
+                }
+
+                MatOfPoint2f obj = new MatOfPoint2f();
+                obj.fromList(imgPoints1List);
+                MatOfPoint2f scene = new MatOfPoint2f();
+                scene.fromList(imgPoints2List);
+
+                Mat H = Calib3d.findHomography(obj, scene, Calib3d.RANSAC,3);
+
+                int imageWidth = right.cols();
+                int imageHeight = right.rows();
+
+                // To avoid missing some of the possible stitching scenarios, we offset the homography to the middle of a mat which has three time the size of one of the pictures.
+                // Extracted from this: https://stackoverflow.com/questions/21618044/stitching-2-images-opencv
+                Mat Offset = new Mat(3, 3, H.type());
+                Offset.put(0,0, new double[]{1});
+                Offset.put(0,1, new double[]{0});
+                Offset.put(0,2, new double[]{imageWidth});
+                Offset.put(1,0, new double[]{0});
+                Offset.put(1,1, new double[]{1});
+                Offset.put(1,2, new double[]{imageHeight});
+                Offset.put(2,0, new double[]{0});
+                Offset.put(2,1, new double[]{0});
+                Offset.put(2,2, new double[]{1});
+
+                // Multiply the homography mat with the offset.
+                Core.gemm(Offset, H, 1, new Mat(), 0, H);
+
+                Mat obj_corners = new Mat(4,1,CvType.CV_32FC2);
+                Mat scene_corners = new Mat(4,1,CvType.CV_32FC2);
+
+                obj_corners.put(0,0, new double[]{0,0});
+                obj_corners.put(0,0, new double[]{imageWidth,0});
+                obj_corners.put(0,0,new double[]{imageWidth,imageHeight});
+                obj_corners.put(0,0,new double[]{0,imageHeight});
+
+                Core.perspectiveTransform(obj_corners, scene_corners, H);
+
+                // The resulting mat will be three times the size (width and height) of one of the source images. (We assume, that both images have the same size.
+                Size s = new Size(imageWidth *3,imageHeight*3);
+                Mat img_matches = new Mat(new Size(left.cols()+right.cols(),left.rows()), CvType.CV_32FC2);
+
+                // Perform the perspective warp of img1 with the given homography and place it on the large result mat.
+                Imgproc.warpPerspective(left, img_matches, H, s);
+
+                // Create another mat which is used to hold the second image and place it in the middle of the large sized result mat.
+                int m_xPos = (int)(img_matches.size().width/2 - right.size().width/2);
+                int m_yPos = (int)(img_matches.size().height/2 - right.size().height/2);
+                Mat m = new Mat(img_matches,new Rect(m_xPos, m_yPos, right.cols(), right.rows()));
+
+                // Copy img2 to the mat in the middle of the large result mat
+                right.copyTo(m);
+
+                // Some debug logging... and some duration logging following...
+                Log.i(this.getClass().getSimpleName(), "Size of img2: width=" + right.size().width + "height=" + right.size().height);
+                Log.i(this.getClass().getSimpleName(), "Size of m: width=" + m.size().width + "height=" + m.size().height);
+                Log.i(this.getClass().getSimpleName(), "Size of img_matches: width=" + img_matches.size().width + "height=" + img_matches.size().height);
+
+                long elapsedTime = System.nanoTime() - startTime;
+                elapsedTime = elapsedTime / 1000000; // Milliseconds (1:1000000)
+                Log.i(this.getClass().getSimpleName(), "Stitching 2 images took " + elapsedTime + "ms");
+                //loadedImagesText.append("Stitching 2 images took " + elapsedTime + "ms\n");
+
+                // The resulting mat is way to big. It holds a lot of empty "transparent" space.
+                // We will not crop the image, so that only the "region of interest" remains.
+                startTime = System.nanoTime();
+                int stepping = 6;
+
+                //Rect imageBoundingBox3 = findImageBoundingBox2(img_matches, stepping, true);
+
+                elapsedTime = System.nanoTime() - startTime;
+                elapsedTime = elapsedTime / 1000000; // Milliseconds (1:1000000)
+                //Log.i(this.getClass().getSimpleName(), "Resulting rect has tl(x=" + imageBoundingBox3.tl().x + ", y=" + imageBoundingBox3.tl().y +") and br(x=" + imageBoundingBox3.br().x + ", y=" + imageBoundingBox3.br().y +") with stepping="+stepping+" and auto-correct=true\n");
+                Log.i(this.getClass().getSimpleName(), "Cropping stitched image (v2.1) took " + elapsedTime + "ms");
+
+                //loadedImagesText.append("Resulting rect has tl(x=" + imageBoundingBox3.tl().x + ", y=" + imageBoundingBox3.tl().y +") and br(x=" + imageBoundingBox3.br().x + ", y=" + imageBoundingBox3.br().y +") with stepping="+stepping+" and auto-correct=true\n");
+                //loadedImagesText.append("Cropping stitched image (v2.1) took " + elapsedTime + "ms\n");
+
+                // Extract the calculated region of interest from the result mat.
+               // Mat regionOfInterest = img_matches.submat(imageBoundingBox3);
+
+
+
+
+
+        }
+
+
+        //String ss = spinner.getSelectedItem().toString();
+        //int po = spinner.getSelectedItemPosition();
+        //Toast.makeText(getBaseContext(), ss + " - " + po, Toast.LENGTH_SHORT).show();
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
 
     // In the SimpleOnGestureListener subclass you should override
     // onDown and any other gesture that you want to detect.

@@ -1,9 +1,10 @@
 <resources>
     <string name="app_name">Lop_1.1</string>
     <string-array name="spinner_array">
-        <item>Mercury</item>
-        <item>Venus</item>
-        <item>Earth</item>
+        <item>Optns</item>
+        <item>Rotate</item>
+        <item>Submat</item>
+        <item>Stitch</item>
         <item>Mars</item>
         <item>Jupiter</item>
         <item>Saturn</item>
